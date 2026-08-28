@@ -181,7 +181,11 @@ class AppGate {
           error: exception,
         ),
       );
-      _onError?.call(exception);
+      try {
+        _onError?.call(exception);
+      } catch (_) {
+        // Prevent exceptions in user-provided error handlers from masking AppGateQueueFullException.
+      }
       throw exception;
     }
 

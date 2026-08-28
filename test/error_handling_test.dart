@@ -136,5 +136,33 @@ void main() {
 
       crashingGate.dispose();
     });
+
+    test(
+        'throwing exception in onError during queue full still throws AppGateQueueFullException',
+        () async {
+      final crashingGate = AppGate(
+        config: const AppGateConfig(maxPendingActions: 1),
+        onError: (ex) {
+          throw StateError('Crashing onError during queue full');
+        },
+      );
+
+      // Queue first action
+      await crashingGate.run(
+        requires: ['closed_gate'],
+        action: () {},
+      );
+
+      // Second action exceeds capacity
+      expect(
+        () => crashingGate.run(
+          requires: ['closed_gate'],
+          action: () {},
+        ),
+        throwsA(isA<AppGateQueueFullException>()),
+      );
+
+      crashingGate.dispose();
+    });
   });
 }
