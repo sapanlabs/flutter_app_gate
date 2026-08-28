@@ -1,0 +1,20 @@
+name: flutter_app_gate
+description: A lightweight, concurrency-safe coordination package to defer actions until named conditions ("gates") are open. Zero dependencies, pure Dart.
+version: 0.1.0
+homepage: https://github.com/sapanlabs/flutter_app_gate
+repository: https://github.com/sapanlabs/flutter_app_gate
+issue_tracker: https://github.com/sapanlabs/flutter_app_gate/issues
+
+topics:
+  - flutter
+  - dart
+  - app-lifecycle
+  - initialization
+  - coordination
+
+environment:
+  sdk: ^3.0.0
+
+dev_dependencies:
+  lints: ^3.0.0
+  test: ^1.24.0
