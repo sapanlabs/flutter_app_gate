@@ -1,6 +1,6 @@
 /// A lightweight coordination package that allows developers to defer actions
 /// until one or more named conditions ("gates") are open.
-library flutter_app_gate;
+library;
 
 export 'src/app_gate.dart';
 export 'src/config/app_gate_config.dart';
