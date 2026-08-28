@@ -16,6 +16,17 @@ void main() {
       }
     });
 
+    test('rejects configuration with non-positive maxPendingActions', () {
+      expect(
+        () => AppGate(config: AppGateConfig(maxPendingActions: 0)),
+        throwsA(anyOf(isA<AssertionError>(), isA<ArgumentError>())),
+      );
+      expect(
+        () => AppGate(config: AppGateConfig(maxPendingActions: -10)),
+        throwsA(anyOf(isA<AssertionError>(), isA<ArgumentError>())),
+      );
+    });
+
     test('executes action immediately when all required gates are open',
         () async {
       appGate.open('app');

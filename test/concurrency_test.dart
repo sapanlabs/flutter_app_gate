@@ -147,5 +147,97 @@ void main() {
       }
       expect(appGate.pendingCount, equals(0));
     });
+
+    test(
+        'action callback opening another gate re-entrantly drains dependent actions',
+        () async {
+      final executionOrder = <String>[];
+
+      // Action 1 requires gateA, and opens gateB when executed
+      await appGate.run(
+        id: 'action_1',
+        requires: ['gateA'],
+        action: () {
+          executionOrder.add('action_1');
+          appGate.open('gateB');
+        },
+      );
+
+      // Action 2 requires gateB
+      await appGate.run(
+        id: 'action_2',
+        requires: ['gateB'],
+        action: () {
+          executionOrder.add('action_2');
+        },
+      );
+
+      // Open gateA -> Action 1 runs -> opens gateB -> Action 2 runs
+      appGate.open('gateA');
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+
+      expect(executionOrder, equals(['action_1', 'action_2']));
+      expect(appGate.pendingCount, equals(0));
+    });
+
+    test(
+        'action callback resetting appGate re-entrantly cleans queue and exits loop safely',
+        () async {
+      final executed = <String>[];
+
+      await appGate.run(
+        id: 'action_1',
+        requires: ['gateA'],
+        action: () {
+          executed.add('action_1');
+          appGate.reset();
+        },
+      );
+
+      await appGate.run(
+        id: 'action_2',
+        requires: ['gateA'],
+        action: () {
+          executed.add('action_2');
+        },
+      );
+
+      appGate.open('gateA');
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+
+      expect(executed, equals(['action_1']));
+      expect(appGate.pendingCount, equals(0));
+      expect(appGate.openGates, isEmpty);
+    });
+
+    test(
+        'action callback disposing appGate re-entrantly terminates processing safely',
+        () async {
+      final executed = <String>[];
+
+      await appGate.run(
+        id: 'action_1',
+        requires: ['gateA'],
+        action: () {
+          executed.add('action_1');
+          appGate.dispose();
+        },
+      );
+
+      await appGate.run(
+        id: 'action_2',
+        requires: ['gateA'],
+        action: () {
+          executed.add('action_2');
+        },
+      );
+
+      appGate.open('gateA');
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+
+      expect(executed, equals(['action_1']));
+      expect(appGate.isDisposed, isTrue);
+      expect(appGate.pendingCount, equals(0));
+    });
   });
 }

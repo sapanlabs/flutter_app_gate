@@ -18,7 +18,15 @@ class AppGate {
     AppGateConfig? config,
     AppGateErrorHandler? onError,
   })  : config = config ?? const AppGateConfig(),
-        _onError = onError;
+        _onError = onError {
+    if (this.config.maxPendingActions <= 0) {
+      throw ArgumentError.value(
+        this.config.maxPendingActions,
+        'config.maxPendingActions',
+        'maxPendingActions must be greater than zero.',
+      );
+    }
+  }
 
   /// The configuration applied to this [AppGate] instance.
   final AppGateConfig config;
